@@ -1,0 +1,23 @@
+{
+  "id": "s005",
+  "title": "分支内改口 + 兄弟分支：毕业去向",
+  "branch_op": "update_in_branch",
+  "fact_type": "update",
+  "note": "当前分支里用户先说考研、后改口直接工作（合法的知识更新）；兄弟分支里说出国读研（必须不可见）。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "大三了，开始想毕业以后的事。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "你现在倾向哪个方向？", "t": 5},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "我打算考研，目标是本校的计算机专业。", "t": 60},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "考本校的话信息比较透明，可以先找学长学姐要真题。", "t": 65},
+    {"id": "e5", "parent": "e4", "role": "user", "text": "想了想还是不考研了，毕业直接找工作。", "t": 3600},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "直接工作也很好，可以从现在开始准备实习。", "t": 3605},
+    {"id": "e7", "parent": "e4", "role": "user", "text": "我决定出国读研，打算申请新加坡的学校。", "t": 7200},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "新加坡的学校申请季一般在秋天，可以开始准备语言成绩。", "t": 7205},
+    {"id": "e9", "parent": "e6", "role": "user", "text": "实习的话简历该怎么写？", "t": 9000},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "简历突出项目经历，写清楚你负责的部分和最终结果。", "t": 9005}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e10", "kind": "leak", "question": "我毕业后打算做什么？", "must_include_any": ["工作"], "must_not_include": ["出国", "新加坡"], "note": "答『考研』不算跨分支泄漏，但算没跟上分支内改口，评分时单独统计"},
+    {"id": "q2", "anchor": "e10", "kind": "retain", "question": "我当初想考哪里的研究生？", "must_include_any": ["本校"], "must_not_include": []}
+  ]
+}

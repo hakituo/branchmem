@@ -1,0 +1,23 @@
+{
+  "id": "s001",
+  "title": "编辑用户消息：搬去哪个城市",
+  "branch_op": "edit_user",
+  "fact_type": "plan",
+  "note": "用户把『成都』改成『杭州』后继续对话；成都分支已被记忆系统处理过。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "最近在纠结要不要换个城市生活。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "换城市是大事，你主要考虑哪些因素？", "t": 5},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "我家的猫叫年糕，搬家得考虑它适不适应。", "t": 60},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "猫适应新环境需要时间，提前准备它熟悉的窝和猫砂会好很多。", "t": 65},
+    {"id": "e5", "parent": "e4", "role": "user", "text": "决定了，下个月搬去成都。", "t": 120},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "成都节奏慢、吃得好，挺适合的。需要我帮你列搬家清单吗？", "t": 125},
+    {"id": "e7", "parent": "e4", "role": "user", "text": "决定了，下个月搬去杭州。", "t": 300},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "杭州离上海近，工作机会也多。需要我帮你列搬家清单吗？", "t": 305},
+    {"id": "e9", "parent": "e8", "role": "user", "text": "好啊，帮我列一下。", "t": 400},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "搬家清单：1. 预约搬家公司；2. 给年糕准备航空箱；3. 办理宽带迁移。", "t": 405}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e10", "kind": "leak", "question": "我下个月要搬去哪个城市？", "must_include_any": ["杭州"], "must_not_include": ["成都"]},
+    {"id": "q2", "anchor": "e10", "kind": "retain", "question": "我的猫叫什么名字？", "must_include_any": ["年糕"], "must_not_include": []}
+  ]
+}

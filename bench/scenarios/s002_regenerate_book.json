@@ -1,0 +1,18 @@
+{
+  "id": "s002",
+  "title": "重新生成回复：推荐的书",
+  "branch_op": "regenerate",
+  "fact_type": "preference",
+  "note": "事实出现在助手回复里：第一次生成推荐 CSAPP，重新生成后推荐 OSTEP，用户接受了后者。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "想找本讲操作系统的入门书，有推荐吗？", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "推荐《深入理解计算机系统》，覆盖面广，适合打基础。", "t": 6},
+    {"id": "e3", "parent": "e1", "role": "assistant", "text": "推荐《操作系统导论》，也就是常说的 OSTEP，可以免费在线阅读。", "t": 30},
+    {"id": "e4", "parent": "e3", "role": "user", "text": "好，那我就读这本了。顺便说一下，我每天只有晚上九点以后有空。", "t": 90},
+    {"id": "e5", "parent": "e4", "role": "assistant", "text": "晚上九点以后每天读一章左右，大约两个月能读完。", "t": 95}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e5", "kind": "leak", "question": "你推荐我读的是哪本书？", "must_include_any": ["操作系统导论", "OSTEP"], "must_not_include": ["深入理解计算机系统"]},
+    {"id": "q2", "anchor": "e5", "kind": "retain", "question": "我每天什么时候有空看书？", "must_include_any": ["九点"], "must_not_include": []}
+  ]
+}

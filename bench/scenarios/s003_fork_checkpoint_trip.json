@@ -1,0 +1,22 @@
+{
+  "id": "s003",
+  "title": "从检查点分叉重跑：Agent 订票与订酒店",
+  "branch_op": "fork_checkpoint",
+  "fact_type": "agent_action",
+  "note": "Agent 在工具查询结果处分叉：A 分支订了高铁和平江路客栈，B 分支（之后到达）订了大巴和观前街酒店。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "帮我安排下周六去苏州的行程，周五晚上出发。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "好的，我先查一下交通。", "t": 3},
+    {"id": "e3", "parent": "e2", "role": "tool", "text": "查询结果：周五晚上有两个班次可选（铁路 19:30 / 公路 20:10），均有余票。", "t": 5},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "已为你预订高铁 G7123，周五 19:30 出发。", "t": 8},
+    {"id": "e5", "parent": "e4", "role": "user", "text": "酒店也订一下。", "t": 40},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "已预订平江路附近的客栈，周五入住。", "t": 45},
+    {"id": "e7", "parent": "e3", "role": "assistant", "text": "已为你预订周五 20:10 的大巴，票价更便宜。", "t": 200},
+    {"id": "e8", "parent": "e7", "role": "user", "text": "行，酒店也订一下。", "t": 230},
+    {"id": "e9", "parent": "e8", "role": "assistant", "text": "已预订观前街附近的酒店，周五入住。", "t": 235}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e9", "kind": "leak", "question": "我周五坐什么交通工具去苏州？", "must_include_any": ["大巴"], "must_not_include": ["高铁", "G7123"]},
+    {"id": "q2", "anchor": "e9", "kind": "leak", "question": "我订的住处在哪附近？", "must_include_any": ["观前街"], "must_not_include": ["平江路"]}
+  ]
+}

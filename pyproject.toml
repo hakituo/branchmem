@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "branchmem"
+version = "0.1.0"
+description = "Branch-aware visibility for derived memory in tree-shaped conversation and agent histories"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+notes = ["numpy>=1.24"]
+zh = ["jieba>=0.42"]
+test = ["pytest>=7"]
+
+[tool.setuptools.packages.find]
+where = ["src", "bench"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "bench"]
+addopts = "-p no:cacheprovider"
