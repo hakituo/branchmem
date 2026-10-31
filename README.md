@@ -194,7 +194,35 @@ the optional spaCy/fastembed extras; scoping goes through `filters={"user_id": .
 
 ### Results
 
-Answer-level results are pending (the test split has not been run yet).
+Test split, run `test-v1`: 20 scenarios, 69 probes (34 leak), 3 runs, `deepseek-v4-flash`
+at temperature 0. Each cell is the mean over the 3 runs. Leak rate is measured on leak probes;
+correct rate is measured on all probes. Full tables, the per-operation breakdown and the
+generating command are in [docs/results_test.md](docs/results_test.md). The conclusion (in
+Chinese) is in [docs/conclusion_test.md](docs/conclusion_test.md).
+
+| System | Leak, neutral prompt | Leak, `switch_back` | Correct, neutral | Leak, conflict prompt |
+|---|---|---|---|---|
+| Full history | 52.0% | 91.7% | 74.4% | 26.5% |
+| Rolling summary | 40.2% | 79.2% | 80.2% | 29.4% |
+| Mem0 OSS 2.2.1 | 60.8% | 91.7% | 70.0% | 42.2% |
+| Mem0 + raw filtered to branch | 50.0% | 95.8% | 75.4% | 20.6% |
+| branchmem (source visibility) | 5.9% | 12.5% | 95.7% | 5.9% |
+| Current-branch raw only (upper bound) | 5.9% | 12.5% | 96.1% | 5.9% |
+
+- **Leakage is common.** Most leaks name the sibling-branch fact next to the right answer.
+  Every system scores 100% on retain probes.
+- **`switch_back` causes the most leakage.** The answer model merges the two branches
+  ("allergic to peanuts and shrimp").
+- **Filtering only the raw messages blocks 18% of Mem0's leaks** (60.8% → 50.0%), because the
+  sibling facts are already in Mem0's own memories. The same raw filter applied to full
+  history blocks 89% (52.0% → 5.9%).
+- **The conflict prompt** was written before the run and not tuned ("prefer the current
+  conversation, give one answer"). It lowers baseline leaks but does not remove them, and
+  the baselines answer with the sibling fact more often.
+- **Two leak probes have the forbidden word in the question itself** (s006 q2, s024 q2), found
+  after the run. They account for the upper bound's 5.9%. The frozen set is unchanged; the
+  report adds a sensitivity table without them, in which branchmem and the upper bound get
+  0–1% and the conclusions hold.
 
 The validator checks that each probe tests what it claims: forbidden words exist only
 off the anchor path and arrived before the question; answer words are on the path;
@@ -226,10 +254,10 @@ content.
       visibility predicate and gates, segmentation
 - [x] optional note store, gated retrieval, extraction pipeline
 - [x] benchmark format, validator, scorer, context-level baselines, 5 scenarios
-- [x] 30 scenarios / 98 probes, dev/test split (human review pending before freezing)
+- [x] 30 scenarios / 98 probes, dev/test split (frozen)
 - [x] answer-level harness: full history, rolling summary, Mem0 OSS, Mem0 + raw filter,
       branchmem, path-only
-- [ ] answer-level results on the frozen test split
+- [x] answer-level results on the frozen test split
 - [ ] invalidation (supersede / retract) as gated derived records
 
 ## License

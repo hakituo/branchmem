@@ -106,3 +106,7 @@ def test_resume_reuses_finished_scenarios_and_reruns_the_rest():
         assert (out / "run2" / "answers.jsonl").read_text(encoding="utf-8").count("\n") == first
         s003 = next(s for s in load_dir(DATA, "dev") if s.id == "s003")
         assert fakes[-1].usage.by_purpose["answer"] == len(s003.probes) * len(views) * len(AS.ANSWER_PROMPTS)  # only s003 was redone
+
+
+def test_question_echo_probes_are_found_mechanically():
+    assert answer_run.question_echo_probes(load_dir(DATA, "test")) == [("s006", "q2"), ("s024", "q2")]
