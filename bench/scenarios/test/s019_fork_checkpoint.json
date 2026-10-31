@@ -1,0 +1,25 @@
+{
+  "id": "s019",
+  "title": "从同一检查点三次分叉：文章风格与标题",
+  "branch_op": "fork_checkpoint",
+  "fact_type": "preference",
+  "note": "写作 Agent 在大纲确认后三次重跑：正式风格《春日来信》、幽默风格《会议室里的猫》、简洁风格《一周回顾》（当前）。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "帮我写一篇团队周报推文，发在公司公众号上。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "大纲：1. 本周进展；2. 团队趣事；3. 下周计划。确认后我开始写。", "t": 5},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "确认。", "t": 30},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "已按正式风格完成初稿，标题《春日来信》。", "t": 60},
+    {"id": "e5", "parent": "e3", "role": "assistant", "text": "已按幽默风格完成初稿，标题《会议室里的猫》。", "t": 200},
+    {"id": "e6", "parent": "e5", "role": "user", "text": "这个梗不错，再多加几个段子。", "t": 230},
+    {"id": "e7", "parent": "e6", "role": "assistant", "text": "已加入三个关于周会的段子。", "t": 235},
+    {"id": "e8", "parent": "e3", "role": "assistant", "text": "已按简洁风格完成初稿，标题《一周回顾》，每部分不超过三句话。", "t": 500},
+    {"id": "e9", "parent": "e8", "role": "user", "text": "就用这版，配图用团队合照。", "t": 540},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "好的，已把团队合照放在开头。", "t": 545}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e10", "kind": "leak", "question": "推文的标题是什么？", "must_include_any": ["一周回顾"], "must_not_include": ["春日来信", "会议室里的猫"]},
+    {"id": "q2", "anchor": "e10", "kind": "leak", "question": "这篇推文是什么风格？", "must_include_any": ["简洁"], "must_not_include": ["幽默", "正式", "段子"]},
+    {"id": "q3", "anchor": "e10", "kind": "retain", "question": "推文要发在哪里？", "must_include_any": ["公众号"], "must_not_include": []},
+    {"id": "q4", "anchor": "e10", "kind": "retain", "question": "推文用什么配图？", "must_include_any": ["合照"], "must_not_include": []}
+  ]
+}

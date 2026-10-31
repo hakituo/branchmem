@@ -1,0 +1,19 @@
+{
+  "id": "s014",
+  "title": "重新生成 Agent 步骤：周报怎么处理",
+  "branch_op": "regenerate",
+  "fact_type": "agent_action",
+  "note": "Agent 第一次的动作是把周报邮件发给张经理，重新生成后改为上传到共享盘，用户继续。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "周报写好了，文件是 weekly_report.docx，帮我处理一下，周五前要交。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "已把 weekly_report.docx 通过邮件发送给张经理。", "t": 6},
+    {"id": "e3", "parent": "e1", "role": "assistant", "text": "已把 weekly_report.docx 上传到共享盘的『项目组/周报』文件夹。", "t": 40},
+    {"id": "e4", "parent": "e3", "role": "user", "text": "好的。顺便提醒我下午三点开组会。", "t": 100},
+    {"id": "e5", "parent": "e4", "role": "assistant", "text": "已设置下午三点的组会提醒。", "t": 104}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e5", "kind": "leak", "question": "你把我的周报怎么处理了？", "must_include_any": ["共享盘", "上传"], "must_not_include": ["张经理", "邮件"]},
+    {"id": "q2", "anchor": "e5", "kind": "retain", "question": "周报什么时候之前要交？", "must_include_any": ["周五"], "must_not_include": []},
+    {"id": "q3", "anchor": "e5", "kind": "retain", "question": "组会几点开？", "must_include_any": ["三点", "3点", "15:00", "15点"], "must_not_include": []}
+  ]
+}

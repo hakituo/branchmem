@@ -110,9 +110,24 @@ def parse_scenario(raw: dict[str, Any]) -> Scenario:
 def load_scenarios(paths: Iterable[Path]) -> list[Scenario]:
     scenarios: list[Scenario] = []
     for path in sorted(paths):
+        if path.name == "FROZEN.json":  # the hash record written by ``freeze``, not a scenario
+            continue
         scenarios.append(parse_scenario(json.loads(path.read_text(encoding="utf-8"))))
     return scenarios
 
 
-def load_dir(directory: Path) -> list[Scenario]:
-    return load_scenarios(directory.glob("*.json"))
+SPLITS = ("dev", "test")
+
+
+def load_dir(directory: Path, split: str = "all") -> list[Scenario]:
+    """Scenarios under ``directory``; ``split`` is ``dev``, ``test`` or ``all`` (both subdirectories).
+
+    A directory without ``dev``/``test`` subdirectories is read flat (``split`` must be ``all``).
+    """
+
+    directory = Path(directory)
+    if split == "all":
+        return load_scenarios(directory.rglob("*.json"))
+    if split not in SPLITS:
+        raise ValueError(f"unknown split {split!r}")
+    return load_scenarios((directory / split).glob("*.json"))

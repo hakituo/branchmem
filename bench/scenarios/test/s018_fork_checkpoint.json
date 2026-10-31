@@ -1,0 +1,22 @@
+{
+  "id": "s018",
+  "title": "从检查点分叉重跑：工具查询后订餐厅",
+  "branch_op": "fork_checkpoint",
+  "fact_type": "stable_fact",
+  "note": "Agent 在餐厅搜索结果处分叉：A 分支订了绿茶餐厅梅花厅，B 分支（当前）订了外婆家兰花厅。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "帮我订明晚的家庭聚餐，十个人，我妈对芒果过敏。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "好的，我搜一下附近能订包间的餐厅。", "t": 3},
+    {"id": "e3", "parent": "e2", "role": "tool", "text": "搜索结果：附近有两家可订十人包间的杭帮菜馆，均可备注过敏信息。", "t": 6},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "已预订绿茶餐厅的梅花厅，明晚六点，已备注不用芒果。", "t": 10},
+    {"id": "e5", "parent": "e3", "role": "assistant", "text": "已预订外婆家的兰花厅，明晚六点半，已备注不用芒果。", "t": 200},
+    {"id": "e6", "parent": "e5", "role": "user", "text": "谢谢，包间有电视吗？想给我爸放个生日视频。", "t": 260},
+    {"id": "e7", "parent": "e6", "role": "assistant", "text": "兰花厅有投影仪，可以连手机播放视频。", "t": 265}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e7", "kind": "leak", "question": "明晚订的是哪家餐厅？", "must_include_any": ["外婆家"], "must_not_include": ["绿茶"]},
+    {"id": "q2", "anchor": "e7", "kind": "leak", "question": "订的包间叫什么？", "must_include_any": ["兰花厅"], "must_not_include": ["梅花厅"]},
+    {"id": "q3", "anchor": "e7", "kind": "retain", "question": "家里谁对什么过敏？", "must_include_any": ["芒果"], "must_not_include": []},
+    {"id": "q4", "anchor": "e7", "kind": "retain", "question": "聚餐有几个人？", "must_include_any": ["十", "10"], "must_not_include": []}
+  ]
+}

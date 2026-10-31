@@ -18,7 +18,7 @@ message into "Hangzhou").
 The bundled benchmark shows this in its simplest form: a reader that filters raw
 messages but keeps memory items created on arrival leaks on every leak probe.
 
-| reader (context level, 5 scenarios, 10 probes) | leak rate | hit rate |
+| reader (context level, test split: 20 scenarios, 69 probes) | leak rate | hit rate |
 |---|---|---|
 | `all_history`: every arrived message, in arrival order | 100% | 100% |
 | `raw_filtered_notes_unfiltered`: raw filtered, derived memory kept | 100% | 100% |
@@ -138,9 +138,63 @@ Counts from compat reads are not evidence of zero leakage; report them separatel
 
 ```bash
 python -m pytest -q
-python -m branchbench validate
-python -m branchbench context-report
+python -m branchbench validate                 # all 30 scenarios; --split dev|test for one split
+python -m branchbench context-report --split test
 ```
+
+### Scenario set
+
+30 synthetic Chinese dialogues with 98 probes, 6 scenarios per branch operation
+(`edit_user`, `regenerate`, `fork_checkpoint`, `switch_back`, `update_in_branch`), covering
+stable facts, preferences, plans, agent actions and in-branch corrections. Some add
+distractors: small talk around the fork, a longer abandoned sibling, several forks of the
+same message, probes anchored on a branch that was later abandoned.
+
+- `bench/scenarios/dev/` (10 scenarios, 29 probes): the 5 original scenarios plus one new
+  scenario per branch operation (seeded draw). May be used to tune prompts and the pipeline.
+- `bench/scenarios/test/` (20 scenarios, 69 probes): frozen. Reported results use this
+  split only. `bench/scenarios/FROZEN.json` records a SHA-256 per file; `answer-run` on the
+  test split refuses to start if any file differs (`python -m branchbench check-frozen`).
+
+### Answer-level runs
+
+Every system receives all messages in arrival order, abandoned branches included, then
+answers each probe at its anchor with the same model, the same prompt and temperature 0.
+Systems: `full_history`, `rolling_summary`, `mem0` (Mem0 OSS add/search),
+`mem0_raw_filtered` (current-branch raw messages + the same Mem0 memories),
+`branchmem` (this library: extraction on arrival, gated retrieval), `path_only` (upper
+bound). See `bench/branchbench/answer_systems.py`.
+
+```bash
+python -m venv .venv && .venv/bin/pip install -e ".[bench,test]"   # Mem0 in its own venv
+cp .env.example .env        # fill in the keys; .env is git-ignored, existing env vars win
+python -m branchbench estimate --split test --runs 3     # call counts and tokens, no API calls
+python -m branchbench answer-run --split dev --runs 1 --label dev-smoke --limit 3
+scripts/run_offpeak.sh      # dev x1, then test x3, then docs/results_test.md; rerun to resume
+python -m branchbench answer-report results/test-v1 --markdown docs/results_test.md
+```
+
+Raw answers, contexts, manifests (git commit, scenario hashes, model, prompts, Mem0
+version, extras and redacted config, token usage per session) and per-run summaries go to
+`results/`, which is not committed. `answer-report` re-scores the saved raw answers every
+time, so each number in the committed table under `docs/` traces back to `answers.jsonl`.
+An interrupted run continues with `--resume` (scenarios that finished cleanly are reused,
+the others are rerun from an empty store).
+
+Scoring normalizes the answer and the keywords the same way before matching (whitespace,
+Markdown emphasis and thousands separators dropped, Chinese numerals turned into digits:
+"晚上 9 点" matches "九点"); the validator applies the same normalization. A leak is split
+into "answered with the sibling's fact" (no answer word) and "right answer, sibling fact
+mentioned too".
+
+Mem0 notes (mem0ai 2.2.1, default install): `add` makes one LLM call per message with an
+additive extraction prompt (no UPDATE/DELETE step) and gives the model the session's last
+10 messages in arrival order, abandoned branches included; `search` is vector-only without
+the optional spaCy/fastembed extras; scoping goes through `filters={"user_id": ...}`.
+
+### Results
+
+Answer-level results are pending (the test split has not been run yet).
 
 The validator checks that each probe tests what it claims: forbidden words exist only
 off the anchor path and arrived before the question; answer words are on the path;
@@ -172,9 +226,10 @@ content.
       visibility predicate and gates, segmentation
 - [x] optional note store, gated retrieval, extraction pipeline
 - [x] benchmark format, validator, scorer, context-level baselines, 5 scenarios
-- [ ] about 30 scenarios / 100 probes (templates + human review)
-- [ ] answer-level baselines (e.g. Mem0-style ADD/UPDATE/DELETE, global expiry,
-      lineage-label filtering), which need LLM calls
+- [x] 30 scenarios / 98 probes, dev/test split (human review pending before freezing)
+- [x] answer-level harness: full history, rolling summary, Mem0 OSS, Mem0 + raw filter,
+      branchmem, path-only
+- [ ] answer-level results on the frozen test split
 - [ ] invalidation (supersede / retract) as gated derived records
 
 ## License

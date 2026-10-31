@@ -1,0 +1,27 @@
+{
+  "id": "s021",
+  "title": "切回旧分支：咖啡偏好（新分支更长）",
+  "branch_op": "switch_back",
+  "fact_type": "preference",
+  "note": "A 分支：喜欢冰美式；B 分支（后到达、更长）：喜欢燕麦拿铁。用户随后切回 A 继续聊。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "公司楼下新开了家咖啡店，帮我记一下我的口味，以后让你帮我点。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "好的，你平时喝什么？", "t": 4},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "我只喝冰美式，不加糖。", "t": 40},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "记下了：冰美式，不加糖。", "t": 44},
+    {"id": "e5", "parent": "e2", "role": "user", "text": "我喜欢燕麦拿铁，要热的。", "t": 200},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "记下了：热的燕麦拿铁。", "t": 204},
+    {"id": "e7", "parent": "e6", "role": "user", "text": "他们家的燕麦奶是哪个牌子？", "t": 240},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "这个需要问店员，常见的是 OATLY。", "t": 244},
+    {"id": "e9", "parent": "e8", "role": "user", "text": "下午能顺便带个可颂吗？", "t": 280},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "可以，我加在订单里。", "t": 284},
+    {"id": "e11", "parent": "e4", "role": "user", "text": "我一般下午两点喝第一杯。", "t": 600},
+    {"id": "e12", "parent": "e11", "role": "assistant", "text": "好的，以后每天一点五十帮你下单。", "t": 605}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e12", "kind": "leak", "question": "我平时喝什么咖啡？", "must_include_any": ["美式"], "must_not_include": ["拿铁", "燕麦"]},
+    {"id": "q2", "anchor": "e12", "kind": "leak", "question": "我的咖啡要冷的还是热的？", "must_include_any": ["冰"], "must_not_include": ["热的"]},
+    {"id": "q3", "anchor": "e12", "kind": "leak", "question": "我的订单里除了咖啡还有别的吗？", "must_include_any": ["没有", "只有", "美式"], "must_not_include": ["可颂"]},
+    {"id": "q4", "anchor": "e12", "kind": "retain", "question": "我一般几点喝第一杯咖啡？", "must_include_any": ["两点", "2点", "14"], "must_not_include": []}
+  ]
+}

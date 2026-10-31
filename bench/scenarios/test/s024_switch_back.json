@@ -1,0 +1,25 @@
+{
+  "id": "s024",
+  "title": "三个分支后切回最早的分支：老家",
+  "branch_op": "switch_back",
+  "fact_type": "stable_fact",
+  "note": "同一条用户消息先后有三个版本：大连（A）、桂林（B）、洛阳（C，最新）。q3 锚在 C 末尾；之后用户切回 A。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "过年想回老家，帮我看看怎么走。我在深圳工作。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "好的，你老家是哪里？", "t": 4},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "我老家在大连。", "t": 40},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "深圳到大连可以直飞，三个半小时左右。", "t": 45},
+    {"id": "e5", "parent": "e2", "role": "user", "text": "我老家在桂林。", "t": 200},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "深圳到桂林坐高铁三个多小时就到。", "t": 205},
+    {"id": "e7", "parent": "e2", "role": "user", "text": "我老家在洛阳。", "t": 400},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "深圳到洛阳可以坐高铁到郑州再转车，或者直飞洛阳。", "t": 405},
+    {"id": "e9", "parent": "e4", "role": "user", "text": "直飞的话，春节机票大概多少钱？", "t": 800},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "春节前后单程大概一千五到两千，越早订越便宜。", "t": 805}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e10", "kind": "leak", "question": "我老家在哪里？", "must_include_any": ["大连"], "must_not_include": ["桂林", "洛阳"]},
+    {"id": "q2", "anchor": "e10", "kind": "leak", "question": "我回老家要转车吗？", "must_include_any": ["直飞", "不用", "不需要"], "must_not_include": ["郑州", "转车", "高铁"]},
+    {"id": "q3", "anchor": "e8", "kind": "leak", "question": "我老家在哪里？", "must_include_any": ["洛阳"], "must_not_include": ["大连", "桂林"], "note": "锚点在 C 分支（切回 A 之前）"},
+    {"id": "q4", "anchor": "e10", "kind": "retain", "question": "我在哪个城市工作？", "must_include_any": ["深圳"], "must_not_include": []}
+  ]
+}

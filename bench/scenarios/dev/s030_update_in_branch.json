@@ -1,0 +1,27 @@
+{
+  "id": "s030",
+  "title": "多次分叉 + 分支内改口：工作变动",
+  "branch_op": "update_in_branch",
+  "fact_type": "update",
+  "note": "当前分支：在美团做后端，后跳槽到腾讯（合法更新）。同一条消息还有两个兄弟版本：跳槽去阿里、辞职创业做咖啡店。分叉后有闲聊。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "我在美团做后端开发，干了三年了。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "三年经验正是成长快的时候。最近有什么打算吗？", "t": 5},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "我下个月跳槽去阿里，做电商中台。", "t": 3600},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "阿里的中台很有挑战，入职前可以熟悉一下 Java 生态。", "t": 3605},
+    {"id": "e5", "parent": "e2", "role": "user", "text": "我准备辞职创业，开一家咖啡店。", "t": 7200},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "创业风险不小，可以先算清楚房租和人工成本。", "t": 7205},
+    {"id": "e7", "parent": "e2", "role": "user", "text": "我下个月跳槽去腾讯，做游戏后台。", "t": 10800},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "游戏后台对高并发要求很高，可以复习一下缓存和消息队列。", "t": 10805},
+    {"id": "e9", "parent": "e8", "role": "user", "text": "哈哈，今天楼下食堂居然有小龙虾。", "t": 10860},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "那可得多吃两只！", "t": 10865},
+    {"id": "e11", "parent": "e10", "role": "user", "text": "入职前我想休息两周，去趟云南。", "t": 10920},
+    {"id": "e12", "parent": "e11", "role": "assistant", "text": "两周可以走大理、丽江和香格里拉，节奏不会太赶。", "t": 10925}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e12", "kind": "leak", "question": "我下个月要去哪家公司？", "must_include_any": ["腾讯"], "must_not_include": ["阿里", "创业", "咖啡店"]},
+    {"id": "q2", "anchor": "e12", "kind": "leak", "question": "我新工作做什么方向？", "must_include_any": ["游戏"], "must_not_include": ["电商", "中台", "咖啡"]},
+    {"id": "q3", "anchor": "e12", "kind": "retain", "question": "我之前在哪家公司工作？", "must_include_any": ["美团"], "must_not_include": []},
+    {"id": "q4", "anchor": "e12", "kind": "retain", "question": "入职前我打算去哪里玩？", "must_include_any": ["云南", "大理", "丽江"], "must_not_include": []}
+  ]
+}

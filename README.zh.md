@@ -34,9 +34,18 @@ pip install -e ".[test]"    # pytest
 
 ```bash
 python -m pytest -q
-python -m branchbench validate
-python -m branchbench context-report
+python -m branchbench validate                 # 全部 30 个场景；--split dev|test 只看一个集合
+python -m branchbench context-report --split test
+python -m branchbench estimate --split test --runs 3   # 估算调用次数和 token，不调用 API
+python -m branchbench answer-run --split test --runs 3 --label test-v1
+python -m branchbench answer-report results/test-v1 --markdown docs/results_test.md
 ```
+
+场景集：30 个中文合成对话、98 道题，五种分叉方式各 6 个。开发集 `bench/scenarios/dev/`（10 个场景、29 道题，可用来调提示词和流程）；测试集 `bench/scenarios/test/`（20 个场景、69 道题，冻结后不再修改，正式结果只报测试集，`FROZEN.json` 记录每个文件的 SHA-256）。回答级运行的模型配置只从环境变量读取（`BB_LLM_*`、`BB_EMBED_*`），原始产物写进不入库的 `results/`，汇总表入库到 `docs/`。
+
+### 结果
+
+回答级结果待测试集正式运行后补上。
 
 基准场景是合成的分支对话（编辑用户消息、重新生成、从检查点分叉、切回旧分支、分支内改口）。校验器保证每道题真的在测它声称要测的东西；评分只看关键词，不用 LLM 判官，结果可复现。上下文级结果：只过滤原文、保留派生记忆的读法，泄漏题全部泄漏；按来源判断的读法泄漏为 0，命中率 100%。
 

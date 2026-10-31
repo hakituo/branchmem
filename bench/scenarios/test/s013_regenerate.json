@@ -1,0 +1,22 @@
+{
+  "id": "s013",
+  "title": "重新生成回复：健身计划",
+  "branch_op": "regenerate",
+  "fact_type": "plan",
+  "note": "第一次生成的计划是早上跑步（不适合膝盖旧伤），重新生成为晚上游泳，用户接受。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "我想减重五公斤，但膝盖有旧伤，帮我定个运动计划。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "建议每周跑步三次，每天早上六点出门慢跑四十分钟。", "t": 8},
+    {"id": "e3", "parent": "e1", "role": "assistant", "text": "建议每周游泳两次，晚上七点去游四十分钟，对膝盖压力小。", "t": 45},
+    {"id": "e4", "parent": "e3", "role": "user", "text": "好，就按这个来。我家附近的体育中心有泳池。", "t": 110},
+    {"id": "e5", "parent": "e4", "role": "assistant", "text": "那很方便，记得游前热身，游完拉伸。", "t": 115},
+    {"id": "e6", "parent": "e5", "role": "user", "text": "饮食上需要注意什么？", "t": 170},
+    {"id": "e7", "parent": "e6", "role": "assistant", "text": "少吃油炸和甜食，晚饭七分饱，多吃蔬菜和优质蛋白。", "t": 176}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e7", "kind": "leak", "question": "我的运动计划是什么运动？", "must_include_any": ["游泳"], "must_not_include": ["跑步", "慢跑"]},
+    {"id": "q2", "anchor": "e7", "kind": "leak", "question": "我一般什么时候去运动？", "must_include_any": ["晚上", "七点", "7点"], "must_not_include": ["早上", "六点"]},
+    {"id": "q3", "anchor": "e7", "kind": "retain", "question": "我身体有什么旧伤？", "must_include_any": ["膝盖"], "must_not_include": []},
+    {"id": "q4", "anchor": "e7", "kind": "retain", "question": "我想减重多少？", "must_include_any": ["五公斤", "5公斤", "5 公斤", "十斤", "10斤"], "must_not_include": []}
+  ]
+}

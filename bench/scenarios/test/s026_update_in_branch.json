@@ -1,0 +1,25 @@
+{
+  "id": "s026",
+  "title": "分支内改口 + 兄弟分支：住址",
+  "branch_op": "update_in_branch",
+  "fact_type": "stable_fact",
+  "note": "当前分支：先住海淀，后来搬到通州（合法更新）；兄弟分支：搬到昌平。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "帮我算算每天通勤要多久，我在国贸上班。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "好的，你住在哪个区？", "t": 4},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "我住在海淀，五道口附近。", "t": 40},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "五道口到国贸坐地铁大概五十分钟。", "t": 45},
+    {"id": "e5", "parent": "e4", "role": "user", "text": "上周我搬到昌平了，回龙观那边。", "t": 3000},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "回龙观到国贸要一个小时二十分钟左右。", "t": 3005},
+    {"id": "e7", "parent": "e4", "role": "user", "text": "上周我搬到通州了，就在北运河边上。", "t": 6000},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "通州到国贸坐 6 号线大概四十分钟。", "t": 6005},
+    {"id": "e9", "parent": "e8", "role": "user", "text": "那早上八点出门来得及九点打卡吗？", "t": 6060},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "来得及，四十分钟左右就到，还能买个早饭。", "t": 6065}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e10", "kind": "leak", "question": "我现在住在哪个区？", "must_include_any": ["通州"], "must_not_include": ["昌平", "回龙观"]},
+    {"id": "q2", "anchor": "e10", "kind": "leak", "question": "我每天通勤大概要多久？", "must_include_any": ["四十分钟", "40分钟", "40 分钟"], "must_not_include": ["一个小时二十"]},
+    {"id": "q3", "anchor": "e10", "kind": "retain", "question": "我在哪里上班？", "must_include_any": ["国贸"], "must_not_include": []},
+    {"id": "q4", "anchor": "e10", "kind": "retain", "question": "我之前住在哪里？", "must_include_any": ["海淀", "五道口"], "must_not_include": []}
+  ]
+}

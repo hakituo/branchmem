@@ -1,0 +1,25 @@
+{
+  "id": "s029",
+  "title": "分支内改口 + 兄弟分支：婚礼计划",
+  "branch_op": "update_in_branch",
+  "fact_type": "plan",
+  "note": "当前分支：婚礼原定五月，后改到十月（合法更新）；兄弟分支：不办婚礼，去冰岛旅行结婚。分叉前有闲聊。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "今天终于把婚纱照拍完了，累死了。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "恭喜！拍完就轻松了，好好休息一下。", "t": 5},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "婚礼定在明年五月，在老家办，大概二十桌。", "t": 60},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "五月天气好，二十桌的话酒店要提前半年订。", "t": 65},
+    {"id": "e5", "parent": "e4", "role": "user", "text": "我们商量了一下，不办婚礼了，直接去冰岛旅行结婚。", "t": 3600},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "冰岛很浪漫，记得提前看极光季的时间。", "t": 3605},
+    {"id": "e7", "parent": "e4", "role": "user", "text": "五月酒店都订满了，婚礼改到十月。", "t": 7200},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "十月也很好，秋高气爽，请柬可以八月发。", "t": 7205},
+    {"id": "e9", "parent": "e8", "role": "user", "text": "我对象叫阿杰，他想请大学室友当伴郎。", "t": 7260},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "可以提前和室友确认时间，顺便量一下伴郎服的尺码。", "t": 7265}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e10", "kind": "leak", "question": "我们的婚礼什么时候办？", "must_include_any": ["十月", "10月", "10 月"], "must_not_include": ["冰岛", "旅行结婚", "不办"]},
+    {"id": "q2", "anchor": "e10", "kind": "leak", "question": "我们打算怎么结婚？", "must_include_any": ["婚礼", "老家", "二十桌"], "must_not_include": ["冰岛", "旅行结婚", "极光"]},
+    {"id": "q3", "anchor": "e10", "kind": "retain", "question": "婚礼大概办多少桌？", "must_include_any": ["二十", "20"], "must_not_include": []},
+    {"id": "q4", "anchor": "e10", "kind": "retain", "question": "我对象叫什么？", "must_include_any": ["阿杰"], "must_not_include": []}
+  ]
+}

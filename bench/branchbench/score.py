@@ -11,6 +11,8 @@ Both levels share one rule:
 
 from __future__ import annotations
 
+import re
+
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import Iterable
@@ -33,9 +35,46 @@ class ProbeResult:
         return asdict(self)
 
 
+_IGNORED = str.maketrans("", "", " \t\r\n\u3000*,，")
+_DIGITS = {"零": 0, "一": 1, "二": 2, "两": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
+_UNITS = {"十": 10, "百": 100, "千": 1000, "万": 10000}
+_NUMERAL = re.compile(r"[零一二两三四五六七八九十百千]+")
+
+
+def _cn_to_int(run: str) -> int:
+    """Chinese numeral run -> int, colloquial tails included (一千五 = 1500, 两百五 = 250)."""
+
+    total, digit, last_unit = 0, 0, 1
+    for char in run:
+        if char in _DIGITS:
+            digit = _DIGITS[char]
+        else:
+            unit = _UNITS[char]
+            total += (digit or 1) * unit
+            digit, last_unit = 0, unit
+    if digit:
+        total += digit * (last_unit // 10 if last_unit >= 100 else 1)
+    return total
+
+
+def normalize(text: str) -> str:
+    """Formatting-only normalization before matching, applied to the text and to the
+    keywords alike and identically for every system:
+
+    - whitespace, Markdown emphasis and thousands separators are dropped
+      ("晚上 9 点" -> "晚上9点", "**杭州**" -> "杭州", "4,000" -> "4000");
+    - runs of Chinese numerals become Arabic digits ("三年级" -> "3年级", "十一点" -> "11点",
+      "一千五" -> "1500"), so "九点" and "9点" are the same keyword.
+    """
+
+    plain = str(text or "").translate(_IGNORED)
+    return _NUMERAL.sub(lambda m: str(_cn_to_int(m.group(0))), plain)
+
+
 def judge(text: str, probe: Probe) -> tuple[bool, bool]:
-    leaked = any(word in text for word in probe.must_not_include)
-    hit = any(word in text for word in probe.must_include_any)
+    plain = normalize(text)
+    leaked = any(normalize(word) in plain for word in probe.must_not_include)
+    hit = any(normalize(word) in plain for word in probe.must_include_any)
     return leaked, hit
 
 

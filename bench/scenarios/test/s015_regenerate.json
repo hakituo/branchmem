@@ -1,0 +1,21 @@
+{
+  "id": "s015",
+  "title": "重新生成 + 分支内更新：生日聚会",
+  "branch_op": "regenerate",
+  "fact_type": "update",
+  "note": "第一次生成建议火锅店，重新生成建议烧烤，用户接受后又把人数从 8 人改为 12 人（合法更新）。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "下周给女朋友办生日聚会，大概 8 个人，帮我出个主意。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "可以订一家火锅店的包间，热闹又方便。", "t": 6},
+    {"id": "e3", "parent": "e1", "role": "assistant", "text": "可以去郊外的露营地办烧烤派对，氛围轻松。", "t": 40},
+    {"id": "e4", "parent": "e3", "role": "user", "text": "烧烤派对不错！她叫小雨，最喜欢向日葵。", "t": 100},
+    {"id": "e5", "parent": "e4", "role": "assistant", "text": "那可以用向日葵布置场地，再准备一个小雨名字的蛋糕。", "t": 106},
+    {"id": "e6", "parent": "e5", "role": "user", "text": "又多了几个朋友要来，人数改成 12 个人。", "t": 400},
+    {"id": "e7", "parent": "e6", "role": "assistant", "text": "好的，12 个人的话烤架和食材都要多备一些。", "t": 405}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e7", "kind": "leak", "question": "生日聚会打算怎么办？", "must_include_any": ["烧烤", "露营"], "must_not_include": ["火锅"]},
+    {"id": "q2", "anchor": "e7", "kind": "retain", "question": "现在聚会一共多少人？", "must_include_any": ["12", "十二"], "must_not_include": []},
+    {"id": "q3", "anchor": "e7", "kind": "retain", "question": "我女朋友最喜欢什么花？", "must_include_any": ["向日葵"], "must_not_include": []}
+  ]
+}

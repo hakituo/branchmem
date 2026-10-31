@@ -1,0 +1,22 @@
+{
+  "id": "s028",
+  "title": "分支内改口 + 兄弟分支：Agent 设置提醒方式",
+  "branch_op": "update_in_branch",
+  "fact_type": "agent_action",
+  "note": "当前分支：Agent 先设置微信提醒，用户要求改成邮件，Agent 照做（合法更新）；兄弟分支：改成短信。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "每天早上八点提醒我吃降压药。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "已设置每天早上八点通过微信提醒你吃降压药。", "t": 4},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "微信消息太多容易漏，改成短信吧。", "t": 300},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "已把提醒方式改为短信，发送到你的手机。", "t": 305},
+    {"id": "e5", "parent": "e2", "role": "user", "text": "微信消息太多容易漏，改成邮件吧。", "t": 900},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "已把提醒方式改为邮件，每天早上八点发送。", "t": 905},
+    {"id": "e7", "parent": "e6", "role": "user", "text": "顺便周日晚上提醒我给妈妈打电话。", "t": 960},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "已设置每周日晚上八点的邮件提醒：给妈妈打电话。", "t": 965}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e8", "kind": "leak", "question": "吃药提醒现在是通过什么方式发给我的？", "must_include_any": ["邮件"], "must_not_include": ["短信"]},
+    {"id": "q2", "anchor": "e8", "kind": "retain", "question": "你每天几点提醒我吃药？", "must_include_any": ["八点", "8点", "8:00"], "must_not_include": []},
+    {"id": "q3", "anchor": "e8", "kind": "retain", "question": "周日晚上要提醒我做什么？", "must_include_any": ["打电话"], "must_not_include": []}
+  ]
+}

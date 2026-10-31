@@ -1,0 +1,31 @@
+{
+  "id": "s006",
+  "title": "编辑用户消息：职业（带闲聊干扰，兄弟分支更长）",
+  "branch_op": "edit_user",
+  "fact_type": "stable_fact",
+  "note": "用户把『护士』改成『小学老师』。被丢弃的护士分支更长，还聊了夜班作息；分叉前后都有无关闲聊。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "今天下雨了，出门忘带伞，淋了一身。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "辛苦了，回家记得洗个热水澡，别着凉。", "t": 5},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "嗯。对了，我想请你帮我规划一下作息，我养了一只柯基叫土豆，每天要遛两次。", "t": 60},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "好的，遛狗时间可以固定在早晚。先说说你的工作情况吧。", "t": 66},
+    {"id": "e5", "parent": "e4", "role": "user", "text": "我是一名护士，在市医院急诊科上班。", "t": 120},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "急诊科很辛苦，你需要轮夜班吗？", "t": 126},
+    {"id": "e7", "parent": "e6", "role": "user", "text": "对，每周两个夜班，下夜班后白天要补觉。", "t": 180},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "那下夜班的日子可以请邻居或宠物托管帮忙遛土豆，你白天先睡够五个小时。", "t": 186},
+    {"id": "e9", "parent": "e8", "role": "user", "text": "医院食堂太难吃了，夜班只能啃面包。", "t": 240},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "可以提前准备些坚果和酸奶，夜班间隙补充能量。", "t": 246},
+    {"id": "e11", "parent": "e4", "role": "user", "text": "我是一名小学老师，教三年级语文。", "t": 600},
+    {"id": "e12", "parent": "e11", "role": "assistant", "text": "老师的作息比较规律，早上七点前遛土豆，傍晚放学后再遛一次就很合适。", "t": 606},
+    {"id": "e13", "parent": "e12", "role": "user", "text": "哈哈，刚刚窗外有只鸽子一直盯着我看。", "t": 660},
+    {"id": "e14", "parent": "e13", "role": "assistant", "text": "可能是在找吃的吧，城市里的鸽子胆子都挺大。", "t": 665},
+    {"id": "e15", "parent": "e14", "role": "user", "text": "那周末的作息怎么安排？", "t": 720},
+    {"id": "e16", "parent": "e15", "role": "assistant", "text": "周末可以带土豆去公园多玩一会儿，顺便备课和批改作业。", "t": 726}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e16", "kind": "leak", "question": "我是做什么工作的？", "must_include_any": ["老师"], "must_not_include": ["护士", "急诊", "医院"]},
+    {"id": "q2", "anchor": "e16", "kind": "leak", "question": "我平时需要上夜班吗？", "must_include_any": ["不需要", "不用", "没有", "老师", "规律"], "must_not_include": ["夜班"], "note": "当前分支从未提到夜班；任何提到夜班的回答都来自兄弟分支"},
+    {"id": "q3", "anchor": "e16", "kind": "retain", "question": "我的狗叫什么名字？", "must_include_any": ["土豆"], "must_not_include": []},
+    {"id": "q4", "anchor": "e16", "kind": "retain", "question": "我教几年级？", "must_include_any": ["三年级"], "must_not_include": []}
+  ]
+}

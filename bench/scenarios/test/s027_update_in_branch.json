@@ -1,0 +1,22 @@
+{
+  "id": "s027",
+  "title": "分支内改口 + 兄弟分支：饮品偏好",
+  "branch_op": "update_in_branch",
+  "fact_type": "preference",
+  "note": "当前分支：原来每天喝咖啡，后来戒了改喝乌龙茶（合法更新）；兄弟分支：改喝鲜榨果汁。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "我每天早上一杯咖啡，最近睡眠不太好。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "咖啡因可能影响睡眠，下午尽量不要再喝。", "t": 5},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "从这周开始我把咖啡戒了，改喝鲜榨果汁，主要是橙汁。", "t": 3600},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "橙汁含糖量偏高，注意别喝太多。", "t": 3605},
+    {"id": "e5", "parent": "e2", "role": "user", "text": "从这周开始我把咖啡戒了，改喝乌龙茶。", "t": 7200},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "乌龙茶也有少量咖啡因，建议中午之前喝。", "t": 7205},
+    {"id": "e7", "parent": "e6", "role": "user", "text": "我晚上十一点睡，早上七点起。", "t": 7260},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "八小时睡眠很理想，睡前一小时放下手机会更好。", "t": 7265}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e8", "kind": "leak", "question": "我现在每天喝什么？", "must_include_any": ["乌龙"], "must_not_include": ["橙汁", "果汁"]},
+    {"id": "q2", "anchor": "e8", "kind": "retain", "question": "我以前每天早上喝什么？", "must_include_any": ["咖啡"], "must_not_include": []},
+    {"id": "q3", "anchor": "e8", "kind": "retain", "question": "我晚上几点睡？", "must_include_any": ["十一点", "11点", "23"], "must_not_include": []}
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "s008",
+  "title": "多次编辑同一条消息：旅行目的地",
+  "branch_op": "edit_user",
+  "fact_type": "plan",
+  "note": "同一条用户消息被编辑两次：西安 -> 厦门 -> 青岛。q3 的锚点在厦门分支末尾（青岛分支还没到达）。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "国庆想带爸妈出去玩五天。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "好主意！你们想去哪里？", "t": 5},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "去西安吧，想看兵马俑。", "t": 40},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "西安五天可以安排兵马俑、城墙和回民街。", "t": 46},
+    {"id": "e5", "parent": "e2", "role": "user", "text": "去厦门吧，想看海。", "t": 200},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "厦门五天可以去鼓浪屿、环岛路和曾厝垵。", "t": 206},
+    {"id": "e7", "parent": "e6", "role": "user", "text": "鼓浪屿要提前买船票吗？", "t": 260},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "要的，节假日船票很紧张，建议提前一周在线购买。", "t": 265},
+    {"id": "e9", "parent": "e2", "role": "user", "text": "去青岛吧，爸妈想吃海鲜、喝啤酒。", "t": 500},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "青岛五天可以去栈桥、八大关，晚上去啤酒街。", "t": 506},
+    {"id": "e11", "parent": "e10", "role": "user", "text": "我爸腿脚不太好，行程别太赶。", "t": 560},
+    {"id": "e12", "parent": "e11", "role": "assistant", "text": "明白，每天只安排一两个景点，中午留出休息时间。", "t": 566}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e12", "kind": "leak", "question": "国庆我们去哪里玩？", "must_include_any": ["青岛"], "must_not_include": ["西安", "厦门"]},
+    {"id": "q2", "anchor": "e12", "kind": "leak", "question": "行程里有哪些景点？", "must_include_any": ["栈桥", "八大关", "啤酒"], "must_not_include": ["兵马俑", "鼓浪屿", "城墙", "环岛路"]},
+    {"id": "q3", "anchor": "e8", "kind": "leak", "question": "国庆我们去哪里玩？", "must_include_any": ["厦门"], "must_not_include": ["西安"], "note": "锚点在厦门分支；此时青岛分支尚未到达"},
+    {"id": "q4", "anchor": "e12", "kind": "retain", "question": "我爸身体有什么需要注意的？", "must_include_any": ["腿"], "must_not_include": []}
+  ]
+}

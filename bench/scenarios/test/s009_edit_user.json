@@ -1,0 +1,25 @@
+{
+  "id": "s009",
+  "title": "编辑给 Agent 的指令：会议时间与会议室",
+  "branch_op": "edit_user",
+  "fact_type": "agent_action",
+  "note": "用户把『约在周三』改成『约在周四』，两个分支里 Agent 分别查了会议室并发出邀请。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "帮我约产品评审会，参会的有我、小林和老周。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "好的，你希望约在哪天？", "t": 3},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "约在周三下午。", "t": 30},
+    {"id": "e4", "parent": "e3", "role": "tool", "text": "会议室查询：星期三（周三）下午 A305 空闲。", "t": 32},
+    {"id": "e5", "parent": "e4", "role": "assistant", "text": "已预订周三下午 A305，并给小林和老周发了邀请。", "t": 35},
+    {"id": "e6", "parent": "e2", "role": "user", "text": "约在周四下午。", "t": 200},
+    {"id": "e7", "parent": "e6", "role": "tool", "text": "会议室查询：星期四（周四）下午 B201 空闲。", "t": 202},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "已预订周四下午 B201，并给小林和老周发了邀请。", "t": 205},
+    {"id": "e9", "parent": "e8", "role": "user", "text": "再帮我准备一份评审议程。", "t": 260},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "议程：1. 需求回顾；2. 原型演示；3. 排期讨论。", "t": 265}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e10", "kind": "leak", "question": "评审会约在星期几？", "must_include_any": ["周四", "星期四"], "must_not_include": ["周三", "星期三"]},
+    {"id": "q2", "anchor": "e10", "kind": "leak", "question": "评审会在哪个会议室？", "must_include_any": ["B201"], "must_not_include": ["A305"]},
+    {"id": "q3", "anchor": "e10", "kind": "retain", "question": "评审会都有谁参加？", "must_include_any": ["小林", "老周"], "must_not_include": []},
+    {"id": "q4", "anchor": "e10", "kind": "retain", "question": "议程的第二项是什么？", "must_include_any": ["原型"], "must_not_include": []}
+  ]
+}

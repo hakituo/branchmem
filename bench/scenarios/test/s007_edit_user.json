@@ -1,0 +1,22 @@
+{
+  "id": "s007",
+  "title": "编辑用户消息：忌口",
+  "branch_op": "edit_user",
+  "fact_type": "preference",
+  "note": "用户把『我吃素』改成『只是不吃香菜』，然后继续订聚餐。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "周六和同事聚餐，一共六个人，帮我挑家餐厅。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "好的，你自己有什么忌口吗？", "t": 4},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "我吃素，一点肉都不碰。", "t": 50},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "那推荐一家素食自助，菜品多，同事也能吃得开心。", "t": 55},
+    {"id": "e5", "parent": "e2", "role": "user", "text": "我什么都吃，就是不吃香菜。", "t": 300},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "那推荐一家粤菜馆，点菜时备注不放香菜就行。", "t": 305},
+    {"id": "e7", "parent": "e6", "role": "user", "text": "粤菜馆可以，帮我订周六晚上的位子。", "t": 360},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "已为你记下：周六晚上，粤菜馆，六人桌，备注不放香菜。", "t": 365}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e8", "kind": "leak", "question": "我有什么忌口？", "must_include_any": ["香菜"], "must_not_include": ["吃素", "素食", "不碰"]},
+    {"id": "q2", "anchor": "e8", "kind": "leak", "question": "我们周六去吃什么类型的餐厅？", "must_include_any": ["粤菜"], "must_not_include": ["素食", "自助"]},
+    {"id": "q3", "anchor": "e8", "kind": "retain", "question": "聚餐一共几个人？", "must_include_any": ["六", "6"], "must_not_include": []}
+  ]
+}

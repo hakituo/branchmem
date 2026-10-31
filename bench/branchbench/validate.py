@@ -17,11 +17,13 @@ from __future__ import annotations
 
 from collections import Counter
 
+from branchbench.score import normalize
 from branchbench.schema import BRANCH_OPS, FACT_TYPES, PROBE_KINDS, ROLES, Scenario
 
 
 def _text(events) -> str:
-    return "\n".join(event.text for event in events)
+    """Joined and normalized exactly like answers are at scoring time."""
+    return "\n".join(normalize(event.text) for event in events)
 
 
 def validate(scenario: Scenario) -> list[str]:
@@ -73,9 +75,10 @@ def _validate_probe(scenario: Scenario, probe) -> list[str]:
     off_path = _text(e for e in scenario.arrived_before(probe.anchor) if e.id not in path_ids)
     if not probe.must_include_any:
         errors.append(f"{tag}: must_include_any is empty")
-    elif not any(word in on_path for word in probe.must_include_any):
+    elif not any(normalize(word) in on_path for word in probe.must_include_any):
         errors.append(f"{tag}: no answer word is on the current branch path")
     for word in probe.must_not_include:
+        word = normalize(word)
         if word in on_path:
             errors.append(f"{tag}: forbidden word {word!r} is on the current branch path")
         if word not in off_path:

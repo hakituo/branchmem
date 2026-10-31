@@ -1,6 +1,23 @@
+# Python
 __pycache__/
 *.pyc
 .pytest_cache/
 .venv/
+*.egg-info/
+
+# Run artifacts (raw answers, manifests, per-run summaries, Mem0 stores, review sheets)
 results/
 *.log
+
+# Secrets: API keys live only in .env; .env.example is the committed template
+.env
+.env.*
+!.env.example
+
+# Local assistant/editor state: memories, personal preferences, local settings
+.claude/
+CLAUDE.local.md
+memory/
+MEMORY.md
+.idea/
+.vscode/

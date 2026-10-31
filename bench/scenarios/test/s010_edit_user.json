@@ -1,0 +1,24 @@
+{
+  "id": "s010",
+  "title": "编辑用户消息 + 分支内更新：车",
+  "branch_op": "edit_user",
+  "fact_type": "update",
+  "note": "当前分支：白车，之后换成蓝色电车（合法更新）。被编辑掉的分支：把车卖了改坐地铁。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "最近想买个行车记录仪。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "可以，你开的是什么车？", "t": 4},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "一辆白色的卡罗拉，开了六年。", "t": 40},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "卡罗拉装前后双录的记录仪很方便。", "t": 45},
+    {"id": "e5", "parent": "e4", "role": "user", "text": "算了不买了，我已经把车卖了，以后坐地铁上班。", "t": 300},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "坐地铁也省心，不用操心停车了。", "t": 305},
+    {"id": "e7", "parent": "e4", "role": "user", "text": "更正一下，上个月我把卡罗拉换成了一辆蓝色的电车。", "t": 600},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "电车很多自带记录功能，可以先看看车机设置。", "t": 605},
+    {"id": "e9", "parent": "e8", "role": "user", "text": "好，那充电桩装在小区车位上可以吗？", "t": 660},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "可以，先问物业要安装同意书，再联系品牌方上门勘测。", "t": 665}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e10", "kind": "leak", "question": "我现在开什么颜色的车？", "must_include_any": ["蓝"], "must_not_include": ["卖", "地铁"]},
+    {"id": "q2", "anchor": "e10", "kind": "leak", "question": "我平时怎么上班？", "must_include_any": ["开车", "电车", "车"], "must_not_include": ["地铁"]},
+    {"id": "q3", "anchor": "e10", "kind": "retain", "question": "我之前那辆车是什么牌子的？", "must_include_any": ["卡罗拉"], "must_not_include": []}
+  ]
+}

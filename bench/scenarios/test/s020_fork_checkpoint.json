@@ -1,0 +1,24 @@
+{
+  "id": "s020",
+  "title": "从检查点分叉 + 分支内改口：交稿截止日",
+  "branch_op": "fork_checkpoint",
+  "fact_type": "update",
+  "note": "当前分支里截止日先是下周三，用户改口为下周五（合法更新）；兄弟分支里截止日是月底。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "帮我排一下毕业论文的修改计划。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "好的，先确认一下：导师要求什么时候交终稿？", "t": 4},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "导师说月底前交就行。", "t": 60},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "那还有三周，每周改一章刚好。", "t": 65},
+    {"id": "e5", "parent": "e2", "role": "user", "text": "导师要求下周三交终稿。", "t": 300},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "时间很紧，建议今明两天先改实验部分。", "t": 305},
+    {"id": "e7", "parent": "e6", "role": "user", "text": "刚收到通知，截止推迟到下周五了。", "t": 900},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "多了两天，可以把参考文献格式也一起检查一遍。", "t": 905},
+    {"id": "e9", "parent": "e8", "role": "user", "text": "我的导师姓何，他很看重图表。", "t": 960},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "那图表统一字体和配色，坐标轴都标上单位。", "t": 965}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e10", "kind": "leak", "question": "论文终稿什么时候交？", "must_include_any": ["下周五"], "must_not_include": ["月底", "三周"]},
+    {"id": "q2", "anchor": "e10", "kind": "retain", "question": "我的导师姓什么？", "must_include_any": ["何"], "must_not_include": []},
+    {"id": "q3", "anchor": "e10", "kind": "retain", "question": "我的导师看重什么？", "must_include_any": ["图表"], "must_not_include": []}
+  ]
+}

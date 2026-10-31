@@ -1,0 +1,21 @@
+{
+  "id": "s011",
+  "title": "重新生成回复：推荐的电影",
+  "branch_op": "regenerate",
+  "fact_type": "preference",
+  "note": "第一次生成推荐《星际穿越》，用户重新生成后得到《海上钢琴师》并接受；分叉后有闲聊。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "周五晚上想一个人看部电影放松一下，推荐一部？", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "推荐《星际穿越》，画面震撼，配乐也很出色。", "t": 6},
+    {"id": "e3", "parent": "e1", "role": "assistant", "text": "推荐《海上钢琴师》，节奏舒缓，很适合一个人安静地看。", "t": 40},
+    {"id": "e4", "parent": "e3", "role": "user", "text": "好，就看这部。我比较怕看恐怖片，这部不吓人吧？", "t": 100},
+    {"id": "e5", "parent": "e4", "role": "assistant", "text": "完全不吓人，是一部温柔的文艺片。", "t": 105},
+    {"id": "e6", "parent": "e5", "role": "user", "text": "今天地铁上有人外放短视频，好吵。", "t": 160},
+    {"id": "e7", "parent": "e6", "role": "assistant", "text": "确实挺影响人的，下次可以戴个降噪耳机。", "t": 165}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e7", "kind": "leak", "question": "你推荐我周五看哪部电影？", "must_include_any": ["海上钢琴师"], "must_not_include": ["星际穿越"]},
+    {"id": "q2", "anchor": "e7", "kind": "retain", "question": "我怕看哪类电影？", "must_include_any": ["恐怖"], "must_not_include": []},
+    {"id": "q3", "anchor": "e7", "kind": "retain", "question": "我打算什么时候看电影？", "must_include_any": ["周五"], "must_not_include": []}
+  ]
+}

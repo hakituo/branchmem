@@ -1,0 +1,24 @@
+{
+  "id": "s023",
+  "title": "切回旧分支：Agent 清理缓存",
+  "branch_op": "switch_back",
+  "fact_type": "agent_action",
+  "note": "A 分支：Agent 删除了缓存目录；B 分支（后到达）：Agent 把缓存打包成 backup.zip 移到移动硬盘。用户切回 A。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "电脑 C 盘快满了，帮我处理一下 D:/cache 这个文件夹，大概 30G。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "我先看一下里面是什么。", "t": 3},
+    {"id": "e3", "parent": "e2", "role": "tool", "text": "D:/cache 内容：浏览器临时文件、旧安装包，共 30.2G。", "t": 6},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "都是可再生的临时文件，已全部删除，释放了 30.2G。", "t": 10},
+    {"id": "e5", "parent": "e3", "role": "assistant", "text": "已把 D:/cache 打包成 backup.zip，移到了移动硬盘 E 盘。", "t": 200},
+    {"id": "e6", "parent": "e5", "role": "user", "text": "移动硬盘还剩多少空间？", "t": 240},
+    {"id": "e7", "parent": "e6", "role": "tool", "text": "E 盘剩余空间：112G。", "t": 242},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "E 盘还剩 112G。", "t": 245},
+    {"id": "e9", "parent": "e4", "role": "user", "text": "好的，以后每个月提醒我清理一次。", "t": 600},
+    {"id": "e10", "parent": "e9", "role": "assistant", "text": "已设置每月 1 号的清理提醒。", "t": 604}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e10", "kind": "leak", "question": "你是怎么处理 D:/cache 的？", "must_include_any": ["删除", "删掉", "删了"], "must_not_include": ["backup", "打包", "移动硬盘"]},
+    {"id": "q2", "anchor": "e10", "kind": "leak", "question": "那些缓存文件现在还能找回来吗？", "must_include_any": ["不能", "无法", "删除", "删了"], "must_not_include": ["backup", "移动硬盘", "E 盘"]},
+    {"id": "q3", "anchor": "e10", "kind": "retain", "question": "清理提醒设在每月几号？", "must_include_any": ["1 号", "1号", "一号"], "must_not_include": []}
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "s017",
+  "title": "从检查点分叉重跑：周末出游方案（兄弟分支更长）",
+  "branch_op": "fork_checkpoint",
+  "fact_type": "plan",
+  "note": "Agent 在确认需求后分叉：A 分支规划自驾千岛湖并聊了很多细节；B 分支（当前）规划高铁去黄山。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "这周末想和朋友出去玩两天，预算每人一千五，帮我规划。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "收到：周末两天，每人预算一千五。我来出方案。", "t": 4},
+    {"id": "e3", "parent": "e2", "role": "assistant", "text": "方案：自驾去千岛湖，周六上午出发，住湖边民宿。", "t": 20},
+    {"id": "e4", "parent": "e3", "role": "user", "text": "千岛湖要坐游船吗？", "t": 60},
+    {"id": "e5", "parent": "e4", "role": "assistant", "text": "建议坐中心湖区的游船，大概三个小时。", "t": 65},
+    {"id": "e6", "parent": "e5", "role": "user", "text": "自驾的话油费和过路费大概多少？", "t": 120},
+    {"id": "e7", "parent": "e6", "role": "assistant", "text": "往返大约四百元，几个人分摊不算贵。", "t": 125},
+    {"id": "e8", "parent": "e7", "role": "user", "text": "湖边民宿能烧烤吗？", "t": 180},
+    {"id": "e9", "parent": "e8", "role": "assistant", "text": "不少民宿提供烧烤架，预订时可以问一下。", "t": 185},
+    {"id": "e10", "parent": "e2", "role": "assistant", "text": "方案：坐高铁去黄山，周六爬山，晚上住光明顶附近的酒店看日出。", "t": 600},
+    {"id": "e11", "parent": "e10", "role": "user", "text": "爬黄山要准备什么？", "t": 650},
+    {"id": "e12", "parent": "e11", "role": "assistant", "text": "带登山杖、雨衣和充电宝，穿防滑的运动鞋。", "t": 655}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e12", "kind": "leak", "question": "我们周末去哪里玩？", "must_include_any": ["黄山"], "must_not_include": ["千岛湖"]},
+    {"id": "q2", "anchor": "e12", "kind": "leak", "question": "我们怎么去？", "must_include_any": ["高铁"], "must_not_include": ["自驾", "油费"]},
+    {"id": "q3", "anchor": "e12", "kind": "leak", "question": "晚上住在哪里？", "must_include_any": ["光明顶"], "must_not_include": ["民宿", "湖边"]},
+    {"id": "q4", "anchor": "e12", "kind": "retain", "question": "每人预算多少？", "must_include_any": ["一千五", "1500", "1,500"], "must_not_include": []}
+  ]
+}

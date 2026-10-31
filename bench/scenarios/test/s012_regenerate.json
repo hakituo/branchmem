@@ -1,0 +1,20 @@
+{
+  "id": "s012",
+  "title": "多次重新生成：给猫起名",
+  "branch_op": "regenerate",
+  "fact_type": "stable_fact",
+  "note": "助手第一次起名『团子』，第二次『豆包』，第三次『可乐』，用户选了第三个。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "我刚领养了一只英短蓝猫，帮我起个名字吧。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "叫『团子』怎么样？圆滚滚的很可爱。", "t": 5},
+    {"id": "e3", "parent": "e1", "role": "assistant", "text": "叫『豆包』怎么样？软软的很亲切。", "t": 30},
+    {"id": "e4", "parent": "e1", "role": "assistant", "text": "叫『可乐』怎么样？听起来活泼又好记。", "t": 60},
+    {"id": "e5", "parent": "e4", "role": "user", "text": "就叫可乐！它现在四个月大，该打第几针疫苗了？", "t": 120},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "四个月一般已经打完三针猫三联，接下来可以打狂犬疫苗。", "t": 126}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e6", "kind": "leak", "question": "我的猫叫什么名字？", "must_include_any": ["可乐"], "must_not_include": ["团子", "豆包"]},
+    {"id": "q2", "anchor": "e6", "kind": "retain", "question": "我的猫是什么品种？", "must_include_any": ["英短"], "must_not_include": []},
+    {"id": "q3", "anchor": "e6", "kind": "retain", "question": "我的猫多大了？", "must_include_any": ["四个月", "4个月", "4 个月"], "must_not_include": []}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "s022",
+  "title": "切回旧分支：学习计划",
+  "branch_op": "switch_back",
+  "fact_type": "plan",
+  "note": "A 分支：学 Python 数据分析；B 分支（后到达）：学前端 React。用户切回 A。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "我想转行，打算每天下班后学一小时编程。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "很好的计划！你想往哪个方向发展？", "t": 5},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "我想做数据分析，先学 Python。", "t": 60},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "可以先学 pandas，再学可视化。", "t": 65},
+    {"id": "e5", "parent": "e2", "role": "user", "text": "我想做前端开发，先学 React。", "t": 300},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "可以先打好 JavaScript 基础，再上手 React 组件。", "t": 305},
+    {"id": "e7", "parent": "e4", "role": "user", "text": "pandas 有什么好的入门教程？", "t": 700},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "推荐官方的 10 minutes to pandas，再配合 Kaggle 上的练习。", "t": 705}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e8", "kind": "leak", "question": "我在学什么编程方向？", "must_include_any": ["数据分析", "Python", "pandas"], "must_not_include": ["前端", "React", "JavaScript"]},
+    {"id": "q2", "anchor": "e8", "kind": "retain", "question": "我每天打算学多久？", "must_include_any": ["一小时", "1小时", "1 小时", "一个小时"], "must_not_include": []},
+    {"id": "q3", "anchor": "e8", "kind": "retain", "question": "你推荐了什么入门教程？", "must_include_any": ["10 minutes", "Kaggle"], "must_not_include": []}
+  ]
+}

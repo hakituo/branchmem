@@ -1,0 +1,22 @@
+{
+  "id": "s025",
+  "title": "切回旧分支 + 分支内更新：装修预算",
+  "branch_op": "switch_back",
+  "fact_type": "update",
+  "note": "A 分支：沙发预算三千，后改为四千（合法更新）；B 分支（后到达）：预算一万。用户切回 A 继续。",
+  "events": [
+    {"id": "e1", "parent": null, "role": "user", "text": "新家要买沙发，帮我挑一下，客厅是浅灰色的墙。", "t": 0},
+    {"id": "e2", "parent": "e1", "role": "assistant", "text": "好的，你的预算大概多少？", "t": 4},
+    {"id": "e3", "parent": "e2", "role": "user", "text": "预算 3000 左右。", "t": 40},
+    {"id": "e4", "parent": "e3", "role": "assistant", "text": "3000 左右可以看看布艺沙发，米白色和浅灰墙很搭。", "t": 45},
+    {"id": "e5", "parent": "e2", "role": "user", "text": "预算一万，也就是 10000 左右，想要真皮的。", "t": 200},
+    {"id": "e6", "parent": "e5", "role": "assistant", "text": "1万可以买到不错的头层牛皮沙发，深棕色很显档次。", "t": 205},
+    {"id": "e7", "parent": "e4", "role": "user", "text": "想了想，预算可以加到 4000。", "t": 600},
+    {"id": "e8", "parent": "e7", "role": "assistant", "text": "4000 的话可以选带功能位的布艺沙发，坐着更舒服。", "t": 605}
+  ],
+  "probes": [
+    {"id": "q1", "anchor": "e8", "kind": "leak", "question": "我买沙发的预算现在是多少？", "must_include_any": ["4000", "4,000", "四千"], "must_not_include": ["1万", "一万", "10000"]},
+    {"id": "q2", "anchor": "e8", "kind": "leak", "question": "我想买什么材质的沙发？", "must_include_any": ["布艺"], "must_not_include": ["真皮", "牛皮"]},
+    {"id": "q3", "anchor": "e8", "kind": "retain", "question": "我家客厅墙是什么颜色？", "must_include_any": ["浅灰"], "must_not_include": []}
+  ]
+}
