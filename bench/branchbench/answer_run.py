@@ -36,16 +36,22 @@ REPO = Path(__file__).resolve().parents[2]
 # ---------------------------------------------------------------- running
 
 def run_scenario(scenario: Scenario, views: List[str], llm: Callable, workdir: Path, run_tag: str,
-                 mem0_factory: Optional[Callable] = None) -> List[dict]:
-    """Feed the scenario in arrival order; answer each probe once its anchor has arrived."""
+                 mem0_factory: Optional[Callable] = None, prompts: Optional[List[str]] = None) -> List[dict]:
+    """Feed the scenario in arrival order; answer each probe once its anchor has arrived,
+    once per answer prompt (the memory is built once and shared by all prompts)."""
 
+    prompts = list(prompts or AS.ANSWER_PROMPTS)
     rows: List[dict] = []
+
+    def failed(probe, view, context, error):
+        return [_row(scenario, probe, view, context, None, error, prompt) for prompt in prompts]
+
     probes = sorted(scenario.probes, key=lambda p: (scenario.by_id[p.anchor].t, p.id))
     errors: Dict[str, str] = {}
     try:
         systems = AS.build_systems(scenario, views, llm, workdir, run_tag, mem0_factory)
     except Exception as exc:  # noqa: BLE001 - recorded, never silently skipped
-        return [_row(scenario, p, view, None, None, f"setup: {type(exc).__name__}: {exc}") for p in probes for view in views]
+        return [row for p in probes for view in views for row in failed(p, view, None, f"setup: {type(exc).__name__}: {exc}")]
     events = list(scenario.events)
     cursor = 0
     try:
@@ -64,22 +70,24 @@ def run_scenario(scenario: Scenario, views: List[str], llm: Callable, workdir: P
             for system in systems:
                 wanted = [v for v in system.views if v in views]
                 if all(v in errors for v in wanted):
-                    rows += [_row(scenario, probe, v, None, None, errors[v]) for v in wanted]
+                    rows += [row for v in wanted for row in failed(probe, v, None, errors[v])]
                     continue
                 try:
                     contexts = system.contexts(probe)
                 except Exception as exc:  # noqa: BLE001
-                    rows += [_row(scenario, probe, v, None, None, f"context: {type(exc).__name__}: {exc}") for v in wanted]
+                    rows += [row for v in wanted for row in failed(probe, v, None, f"context: {type(exc).__name__}: {exc}")]
                     continue
                 for view in wanted:
                     if view in errors:
-                        rows.append(_row(scenario, probe, view, None, None, errors[view]))
+                        rows += failed(probe, view, None, errors[view])
                         continue
-                    try:
-                        answer = llm(AS.answer_messages(contexts[view], probe.question), purpose="answer")
-                        rows.append(_row(scenario, probe, view, contexts[view], answer, None))
-                    except Exception as exc:  # noqa: BLE001
-                        rows.append(_row(scenario, probe, view, contexts[view], None, f"answer: {type(exc).__name__}: {exc}"))
+                    for prompt in prompts:
+                        try:
+                            answer = llm(AS.answer_messages(contexts[view], probe.question, prompt), purpose="answer")
+                            rows.append(_row(scenario, probe, view, contexts[view], answer, None, prompt))
+                        except Exception as exc:  # noqa: BLE001
+                            rows.append(_row(scenario, probe, view, contexts[view], None,
+                                             f"answer: {type(exc).__name__}: {exc}", prompt))
     finally:
         for system in systems:
             system.close()
@@ -91,12 +99,13 @@ def run_scenario(scenario: Scenario, views: List[str], llm: Callable, workdir: P
     return rows
 
 
-def _row(scenario: Scenario, probe, view: str, context: Optional[str], answer: Optional[str], error: Optional[str]) -> dict:
+def _row(scenario: Scenario, probe, view: str, context: Optional[str], answer: Optional[str], error: Optional[str],
+         prompt: str = "neutral") -> dict:
     leaked = hit = None
     if answer is not None:
         leaked, hit = judge(answer, probe)
     return {"scenario_id": scenario.id, "probe_id": probe.id, "kind": probe.kind, "branch_op": scenario.branch_op,
-            "fact_type": scenario.fact_type, "system": view, "question": probe.question, "context": context,
+            "fact_type": scenario.fact_type, "system": view, "prompt": prompt, "question": probe.question, "context": context,
             "answer": answer, "leaked": leaked, "hit": hit,
             "correct": None if answer is None else bool(hit and not leaked), "error": error}
 
@@ -156,10 +165,23 @@ def _block(rows: List[dict]) -> dict:
             "leak_wrong_rate": _rate([bool(r["leaked"] and not r["hit"]) for r in leak])}
 
 
+def result_key(row: dict) -> str:
+    """``system`` for the neutral answer prompt, ``system@prompt`` for the others."""
+    prompt = row.get("prompt") or "neutral"
+    return row["system"] if prompt == "neutral" else f"{row['system']}@{prompt}"
+
+
+def _key_order(key: str):
+    system, _, prompt = key.partition("@")
+    prompts = list(AS.ANSWER_PROMPTS)
+    return (prompts.index(prompt or "neutral") if (prompt or "neutral") in prompts else 99,
+            AS.VIEWS.index(system) if system in AS.VIEWS else 99)
+
+
 def metrics(rows: List[dict]) -> dict:
     out: Dict[str, Any] = {}
-    for system in sorted({r["system"] for r in rows}, key=lambda s: AS.VIEWS.index(s) if s in AS.VIEWS else 99):
-        mine = [r for r in rows if r["system"] == system]
+    for system in sorted({result_key(r) for r in rows}, key=_key_order):
+        mine = [r for r in rows if result_key(r) == system]
         ops = sorted({r["branch_op"] for r in mine})
         out[system] = {"overall": _block(mine), "by_branch_op": {op: _block([r for r in mine if r["branch_op"] == op]) for op in ops}}
     return out
@@ -238,6 +260,7 @@ def manifest(*, label: str, split: str, views: List[str], runs: int, llm: Any, s
                       "files": {k: v for k, v in hashes.items() if k.startswith(split + "/") or split == "all"}},
         "answer_llm": llm.describe(),
         "prompts": AS.prompt_fingerprint(),
+        "answer_prompts": list(AS.ANSWER_PROMPTS),
         "params": {"summary_every": AS.SUMMARY_EVERY, "summary_recent": AS.SUMMARY_RECENT,
                    "notes_search_limit": AS.NOTES_SEARCH_LIMIT, "mem0_search_limit": AS.MEM0_SEARCH_LIMIT,
                    "branchmem_segment_max_turns": AS.BranchmemSystem.SEGMENT_MAX_TURNS},
@@ -340,23 +363,26 @@ def rescore(out_dir: Path, scenario_dir: Path = REPO / "bench" / "scenarios") ->
     return summary
 
 
-def report_markdown(out_dir: Path) -> str:
-    info = json.loads((out_dir / "manifest.json").read_text(encoding="utf-8"))
-    summary = rescore(out_dir)
-    lines = [f"<!-- generated by `python -m branchbench answer-report {out_dir.as_posix()}`; do not edit by hand -->", "",
-             f"Run `{info['label']}`: split `{info['split']}`, {len(info['scenarios']['ids'])} scenarios, "
-             f"{info['scenarios']['probes']} probes, {info['runs']} runs; answer model `{info['answer_llm'].get('model')}` "
-             f"(temperature 0); scenario set `{info['scenarios']['set_sha256'][:12]}`; commit `{info['git']['commit'][:10]}`"
-             + (" (dirty)" if info["git"]["dirty"] else "") + ".", "",
-             "Cells: mean over runs, (min–max) when runs differ.", "",
-             "| 系统 | 泄漏率 ↓ (leak 题) | 其中答成兄弟分支 | 其中答对但提及 | 正确率 ↑ (全部题) | 保留题命中率 ↑ | 错误数 |",
+PROMPT_TITLES = {"neutral": "主结果：中性回答提示词", "conflict": "稳健性检查：冲突处理回答提示词（事先写定，未调参）"}
+
+
+def _split_by_prompt(summary: dict) -> Dict[str, dict]:
+    groups: Dict[str, dict] = {}
+    for key, data in summary.items():
+        system, _, prompt = key.partition("@")
+        groups.setdefault(prompt or "neutral", {})[system] = data
+    return groups
+
+
+def _tables(summary: dict) -> List[str]:
+    lines = ["| 系统 | 泄漏率 ↓ (leak 题) | 其中答成兄弟分支 | 其中答对但提及 | 正确率 ↑ (全部题) | 保留题命中率 ↑ | 错误数 |",
              "|---|---|---|---|---|---|---|"]
     for system, data in summary.items():
         o = data["overall"]
         lines.append(f"| {LABELS.get(system, system)} | {_fmt(o['leak_rate'])} | {_fmt(o.get('leak_wrong_rate'))} | "
                      f"{_fmt(o.get('leak_mention_rate'))} | {_fmt(o['correct_rate'])} | "
                      f"{_fmt(o['retain_hit_rate'])} | {sum(o['errors'])} |")
-    lines += ["", "泄漏率 = 回答含任一禁止词的 leak 题比例；拆成两类：没有答案词（答成兄弟分支）与有答案词但同时提到兄弟分支事实。"]
+    lines.append("")
     for base, filtered, what in (("mem0", "mem0_raw_filtered", "Mem0 只过滤原文"),
                                  ("full_history", "path_only", "原文全量 → 只给当前分支")):
         if base in summary and filtered in summary:
@@ -365,18 +391,43 @@ def report_markdown(out_dir: Path) -> str:
             if a:
                 lines.append(f"- {what}：泄漏率 {100 * a:.1f}% → {100 * b:.1f}%，挡住 {100 * (a - b) / a:.0f}% 的泄漏。")
     ops = [op for op in OP_ORDER if any(op in d["by_branch_op"] for d in summary.values())]
-    lines += ["", "Leak rate by branch operation (`switch_back` in its own column, last):", "",
+    lines += ["", "按分叉方式的泄漏率（`switch_back` 单独放在最后一列）：", "",
               "| 系统 | " + " | ".join(f"{op} (n={_n(summary, op)})" for op in ops) + " |",
               "|---|" + "---|" * len(ops)]
     for system, data in summary.items():
         lines.append(f"| {LABELS.get(system, system)} | " + " | ".join(_fmt(data["by_branch_op"].get(op, {}).get("leak_rate")) for op in ops) + " |")
-    lines += ["", "Correct rate by branch operation:", "",
+    lines += ["", "按分叉方式的正确率：", "",
               "| 系统 | " + " | ".join(ops) + " |", "|---|" + "---|" * len(ops)]
     for system, data in summary.items():
         lines.append(f"| {LABELS.get(system, system)} | " + " | ".join(_fmt(data["by_branch_op"].get(op, {}).get("correct_rate")) for op in ops) + " |")
+    return lines
+
+
+def report_markdown(out_dir: Path) -> str:
+    info = json.loads((out_dir / "manifest.json").read_text(encoding="utf-8"))
+    groups = _split_by_prompt(rescore(out_dir))
+    lines = [f"<!-- generated by `python -m branchbench answer-report {out_dir.as_posix()}`; do not edit by hand -->", "",
+             f"Run `{info['label']}`: split `{info['split']}`, {len(info['scenarios']['ids'])} scenarios, "
+             f"{info['scenarios']['probes']} probes, {info['runs']} runs; answer model `{info['answer_llm'].get('model')}` "
+             f"(temperature 0); scenario set `{info['scenarios']['set_sha256'][:12]}`; commit `{info['git']['commit'][:10]}`"
+             + (" (dirty)" if info["git"]["dirty"] else "") + ".", "",
+             "单元格：多次运行的均值，各次不同时括号内为（最小–最大）。泄漏率 = 回答含任一禁止词的 leak 题比例，"
+             "拆成两类：没有答案词（答成兄弟分支），以及有答案词但同时提到兄弟分支的事实。", ""]
+    for prompt in [p for p in AS.ANSWER_PROMPTS if p in groups] + [p for p in groups if p not in AS.ANSWER_PROMPTS]:
+        lines += [f"## {PROMPT_TITLES.get(prompt, prompt)}", ""] + _tables(groups[prompt]) + [""]
+    if len(groups) > 1 and "neutral" in groups:
+        others = [p for p in groups if p != "neutral"]
+        lines += ["## 两种回答提示词的泄漏率对比", "",
+                  "| 系统 | neutral | " + " | ".join(others) + " |", "|---|---|" + "---|" * len(others)]
+        for system, data in groups["neutral"].items():
+            cells = [_fmt(data["overall"]["leak_rate"])] + [
+                _fmt(groups[p].get(system, {}).get("overall", {}).get("leak_rate")) for p in others]
+            lines.append(f"| {LABELS.get(system, system)} | " + " | ".join(cells) + " |")
+        lines.append("")
     if info.get("mem0"):
         m = info["mem0"]
-        lines += ["", f"Mem0: `mem0ai` {m.get('version', m.get('version_error'))}; {m['integration']}."]
+        lines += [f"Mem0: `mem0ai` {m.get('version', m.get('version_error'))}; {m['integration']}."]
+    lines += ["", "Answer prompts:", ""] + [f"- `{name}`: {text}" for name, text in AS.ANSWER_PROMPTS.items()]
     return "\n".join(lines) + "\n"
 
 

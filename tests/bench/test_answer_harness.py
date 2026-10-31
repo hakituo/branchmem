@@ -62,7 +62,7 @@ def test_branchmem_adapter_stores_sibling_notes_but_never_shows_them():
 def test_dry_run_covers_every_system_without_errors():
     report = answer_run.estimate(DATA, "dev", 1, list(AS.VIEWS))
     assert report["dry_run_errors"] == []
-    assert report["per_run"]["our_client_calls"]["answer"] == report["probes"] * 6
+    assert report["per_run"]["our_client_calls"]["answer"] == report["probes"] * 6 * len(AS.ANSWER_PROMPTS)
 
 
 def test_metrics_and_across_runs():
@@ -105,4 +105,4 @@ def test_resume_reuses_finished_scenarios_and_reruns_the_rest():
         assert len(manifest["sessions"]) == 2
         assert (out / "run2" / "answers.jsonl").read_text(encoding="utf-8").count("\n") == first
         s003 = next(s for s in load_dir(DATA, "dev") if s.id == "s003")
-        assert fakes[-1].usage.by_purpose["answer"] == len(s003.probes) * len(views)  # only s003 was redone
+        assert fakes[-1].usage.by_purpose["answer"] == len(s003.probes) * len(views) * len(AS.ANSWER_PROMPTS)  # only s003 was redone

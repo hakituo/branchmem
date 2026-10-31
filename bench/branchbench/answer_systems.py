@@ -35,6 +35,18 @@ ANSWER_SYSTEM = (
     "请只根据这些信息，用一两句话直接回答用户的问题。"
 )
 
+#: Second answer prompt, written down on 2026-10-31 before any test-split run and never tuned:
+#: it tells the model how to resolve conflicts, so leaks that survive it are attributable to
+#: what the memory system hands over rather than to the model mentioning both versions.
+ANSWER_SYSTEM_CONFLICT = (
+    "你是用户的个人助手。下面给出你目前掌握的关于用户和这段对话的信息（对话记录和/或记忆条目）。"
+    "如果信息之间有冲突，以用户当前这段对话的最新情况为准，只给出一个答案，不要提及被替换或作废的说法。"
+    "请只根据这些信息，用一两句话直接回答用户的问题。"
+)
+
+#: name -> system prompt; "neutral" is the main result, "conflict" the robustness check
+ANSWER_PROMPTS = {"neutral": ANSWER_SYSTEM, "conflict": ANSWER_SYSTEM_CONFLICT}
+
 SUMMARY_SYSTEM = (
     "你负责维护一段对话的滚动摘要。给你旧摘要和新到达的若干条消息，输出更新后的完整摘要。"
     "保留人名、地点、数字、决定、偏好和已执行的操作等具体信息，不超过 300 字。只输出摘要本身。"
@@ -51,7 +63,8 @@ VIEWS = ("full_history", "rolling_summary", "mem0", "mem0_raw_filtered", "branch
 def prompt_fingerprint() -> dict:
     from branchmem.extraction.llm_extractor import SYSTEM_PROMPT as EXTRACT_SYSTEM
 
-    texts = {"answer_system": ANSWER_SYSTEM, "summary_system": SUMMARY_SYSTEM, "branchmem_extract_system": EXTRACT_SYSTEM}
+    texts = {**{f"answer_system_{name}": text for name, text in ANSWER_PROMPTS.items()},
+             "summary_system": SUMMARY_SYSTEM, "branchmem_extract_system": EXTRACT_SYSTEM}
     return {name: {"sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(), "text": text} for name, text in texts.items()}
 
 
@@ -59,8 +72,8 @@ def render(events: List[Event]) -> str:
     return "\n".join(f"[{event.role}] {event.text}" for event in events)
 
 
-def answer_messages(context: str, question: str) -> list:
-    return [{"role": "system", "content": ANSWER_SYSTEM},
+def answer_messages(context: str, question: str, prompt: str = "neutral") -> list:
+    return [{"role": "system", "content": ANSWER_PROMPTS[prompt]},
             {"role": "user", "content": f"{context}\n\n用户的问题：{question}"}]
 
 
